@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 [![CRAN status](https://www.r-pkg.org/badges/version/sigsim)](https://CRAN.R-project.org/package=sigsim)
 <!-- badges: end -->
 
-**sigsim** simplifies simulation of mutational signature decompositons. 
+**sigsim** simplifies simulation of mutational signature decompositions. 
 
 **sigsim** is part of the [**sigverse**](https://github.com/selkamand/sigverse)
 
@@ -28,22 +28,20 @@ sigsim is in early development and not yet ready for use.
 
 ## Philosophy
 
-Simulating datasets from mutational signature collections is essential for benchmarking the performance of mutational signature analysis tools, particularly identifying failure modes of tool.
+Simulating datasets from mutational signature collections is essential for benchmarking the performance of mutational signature analysis tools, particularly identifying failure modes.
 
 For example, In cancer contexts we're often interested in a single base substitution known as 'Signature 3'. This is because the signature seems to correlate with an underlying biological phenomena that relates a patient's likelihood of responding to certain therapies.
 
-For important signatures like this, its important we understand how well we can actually identify the signature, and what other signatures may cause false positives / false negatives. These sorts of questions can be addressed using simulation experiments.
+For important signatures like this, its important to understand how well we can actually identify the signature, and what other signatures may cause false positives / false negatives. These questions can be addressed using simulation experiments.
 
 
-This package allows you to create simulated datasets, where by 'dataset' we mean per-sample decompositions describing a tally of 'mutations' matching each 'channel' in a signature.
+**sigsim** simplifies creation of simulated datasets, where by 'dataset' we mean per-sample decompositions describing a tally of 'mutations' matching each 'channel' in a signature.
 
 To generate these datasets we first paramaterise a multinomial distribution based on a single mutational signature OR some combination of multiple mutational signatures. We then randomly sample this multimonium distribution 'n' times (where n = number of mutations we want to simulate for a sample).
 
-This can be done with: `sig_simulate_decomposition()`
-
 When you simulate decompositions by random sampling a multinomial model in this way, the randomness of the sampling adds noise. For some experiments, you may want to include decompositions that represent perfect ('noiseless') combinations of two signatures.
 
-You can create these, using the `noise = FALSE` argument of `sig_simulate_decomposition()`
+You can create these 'perfect' datasets using the `noise = FALSE` argument of `sig_simulate_decomposition()`
 
 
 ## Installation
@@ -74,6 +72,17 @@ sig_simulate_decomposition(signatures, model = c('SBS1' = 1), n = 400)
 # Randomly simulate a 400 mutations, where ~30% come from SBS1 and ~70% come from SBS3
 sig_simulate_decomposition(signatures, model = c('SBS1' = 0.3, 'SBS3' = 0.7), n = 400)
 
-# Simulate a decomposition with 400 mutations, which represents a perfect addition of 30% SBS1 and 70% SBS3
+# 'Simulate' a decomposition with 400 mutations, which represents a perfect addition of 30% SBS1 and 70% SBS3
 sig_simulate_decomposition(signatures, model = c('SBS1' = 0.3, 'SBS3' = 0.7), n = 400, noise = FALSE)
 ```
+
+
+## A note on overfitting
+
+The datasets simulated above are well suited for evaluating sensitivity and inter-signature interfence. 
+
+If you're interested in assessing overfitting, you might want more control over the 'noise' you add. In the above models, 'noise' is added by random sampling of the multinomial distribution. For overfitting assessment, we might want our noise to differ more substantially from our signature model.
+
+For example, we could simulate **n1** mutations reflecting a 'perfect' signature and add **n2** mutations from an explicitly defined 'noise' model. But what should our 'noise' model be. One option is just a completely uniform distribution - i.e. just randomly allocation *n2* mutations across all channels.
+
+An alternative noise model is to artificially create a signature with low cosine similarity to ALL other mutational signatures in a collection. Then we can allocate our 'noise' as though it is generated from a signature that's not represented in the signature dataset. This approach is particularly useful where you want to apply mutational signatures in contexts outside of which they were discovered. E.g. if you apply mutational signature databases to childhood cancer, its possible that because of differences in the 'real' mutational processes of the two types of diseases, your signature collection might not completely represent the real pool of possible signatures - and therefore, overfitting is more likely and more problematic.
