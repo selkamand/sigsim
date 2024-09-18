@@ -11,7 +11,7 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 status](https://www.r-pkg.org/badges/version/sigsim)](https://CRAN.R-project.org/package=sigsim)
 <!-- badges: end -->
 
-**sigsim** simplifies simulation of mutational signature decompositions.
+**sigsim** simplifies simulation of mutational signature catalogues.
 
 **sigsim** is part of the
 [**sigverse**](https://github.com/selkamand/sigverse)
@@ -35,8 +35,8 @@ cause false positives / false negatives. These questions can be
 addressed using simulation experiments.
 
 **sigsim** simplifies creation of simulated datasets, where by ‘dataset’
-we mean per-sample decompositions describing a tally of ‘mutations’
-matching each ‘channel’ in a signature.
+we mean per-sample catalogues describing a tally of ‘mutations’ matching
+each ‘channel’ in a signature.
 
 To generate these datasets we first paramaterise a multinomial
 distribution based on a single mutational signature OR some combination
@@ -44,13 +44,13 @@ of multiple mutational signatures. We then randomly sample this
 multimonium distribution ‘n’ times (where n = number of mutations we
 want to simulate for a sample).
 
-When you simulate decompositions by random sampling a multinomial model
-in this way, the randomness of the sampling adds noise. For some
-experiments, you may want to include decompositions that represent
-perfect (‘noiseless’) combinations of two signatures.
+When you simulate catalogues by random sampling a multinomial model in
+this way, the randomness of the sampling adds noise. For some
+experiments, you may want to include catalogues that represent perfect
+(‘noiseless’) combinations of two signatures.
 
 You can create these ‘perfect’ datasets using the `noise = FALSE`
-argument of `sig_simulate_decomposition()`
+argument of `sig_simulate_catalogue()`
 
 ## Installation
 
@@ -80,7 +80,7 @@ sig_simulate_catalogue(signatures, model = c('SBS1' = 1), n = 400)
 # Randomly simulate a 400 mutations, where ~30% come from SBS1 and ~70% come from SBS3
 sig_simulate_catalogue(signatures, model = c('SBS1' = 0.3, 'SBS3' = 0.7), n = 400)
 
-# 'Simulate' a decomposition with 400 mutations, which represents a perfect addition of 30% SBS1 and 70% SBS3
+# 'Simulate' a catalogue with 400 mutations, which represents a perfect addition of 30% SBS1 and 70% SBS3
 sig_simulate_catalogue(signatures, model = c('SBS1' = 0.3, 'SBS3' = 0.7), n = 400, noise = FALSE)
 ```
 
