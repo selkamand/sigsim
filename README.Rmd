@@ -67,22 +67,38 @@ signatures = sig_load('COSMIC_V3.3.1_SBS')
 
 
 # Randomly simulate a 400 mutations, by random sampling SBS1
-sig_simulate_decomposition(signatures, model = c('SBS1' = 1), n = 400)
+sig_simulate_catalogue(signatures, model = c('SBS1' = 1), n = 400)
 
 # Randomly simulate a 400 mutations, where ~30% come from SBS1 and ~70% come from SBS3
-sig_simulate_decomposition(signatures, model = c('SBS1' = 0.3, 'SBS3' = 0.7), n = 400)
+sig_simulate_catalogue(signatures, model = c('SBS1' = 0.3, 'SBS3' = 0.7), n = 400)
 
 # 'Simulate' a decomposition with 400 mutations, which represents a perfect addition of 30% SBS1 and 70% SBS3
-sig_simulate_decomposition(signatures, model = c('SBS1' = 0.3, 'SBS3' = 0.7), n = 400, noise = FALSE)
+sig_simulate_catalogue(signatures, model = c('SBS1' = 0.3, 'SBS3' = 0.7), n = 400, noise = FALSE)
 ```
 
 
-## A note on overfitting
+### Simulating Datasets for Sensitivity, Inter-Signature Interference, and Overfitting Assessment
 
-The datasets simulated above are well suited for evaluating sensitivity and inter-signature interfence. 
+The datasets simulated above are well-suited for evaluating **sensitivity** and **inter-signature interference**. However, if your focus is on **assessing overfitting**, you may need more control over the level and type of 'noise' added to the model. 
 
-If you're interested in assessing overfitting, you might want more control over the 'noise' you add. In the above models, 'noise' is added by random sampling of the multinomial distribution. For overfitting assessment, we might want our noise to differ more substantially from our signature model.
+In the previous examples, noise is introduced via random sampling from the multinomial distribution. But for overfitting assessment, we might want this noise to diverge more significantly from the signatures we're modeling.
 
-For example, we could simulate **n1** mutations reflecting a 'perfect' signature and add **n2** mutations from an explicitly defined 'noise' model. But what should our 'noise' model be. One option is just a completely uniform distribution - i.e. just randomly allocation *n2* mutations across all channels.
+#### Adding Controlled Noise to Simulations
 
-An alternative noise model is to artificially create a signature with low cosine similarity to ALL other mutational signatures in a collection. Then we can allocate our 'noise' as though it is generated from a signature that's not represented in the signature dataset. This approach is particularly useful where you want to apply mutational signatures in contexts outside of which they were discovered. E.g. if you apply mutational signature databases to childhood cancer, its possible that because of differences in the 'real' mutational processes of the two types of diseases, your signature collection might not completely represent the real pool of possible signatures - and therefore, overfitting is more likely and more problematic.
+One approach is to simulate **n1** mutations that follow a 'perfect' signature and then add **n2** mutations from a clearly defined 'noise' model. This raises the question: **what should our noise model be?**
+
+Here are two options:
+
+1. **Uniform Distribution**  
+   A simple choice is to generate noise by randomly distributing the **n2** mutations across all available channels. This represents a completely uniform noise model, where mutations are allocated without reference to any specific signature.
+
+2. **Low-Cosine-Similarity Signature**  
+   A more sophisticated approach is to simulate noise using an artificially created signature with a low cosine similarity to **all** known signatures in a given collection. This simulates the addition of noise from a mutational process not represented in the current dataset.  
+   This approach is particularly useful when applying mutational signatures in novel contexts—such as using signature databases developed for adult cancers in childhood cancer research. Differences in mutational processes between disease types may lead to signatures that don't fully capture the true spectrum of mutational signatures, increasing the risk of overfitting.
+
+#### Simulating Overfitting with Dropped Signatures
+
+Instead of artificially creating a low-similarity signature, another effective strategy is to simulate mutation catalogues using a combination of known signatures, but then **drop one signature** when performing the fitting. If the fitting algorithm attempts to explain the missing signature by over-relying on other available signatures, it indicates overfitting.
+
+This method allows you to test how well the algorithm can handle 'unknown' components—i.e., real mutational processes that aren't represented in your signature collection.
+
