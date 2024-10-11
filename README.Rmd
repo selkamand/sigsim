@@ -67,10 +67,19 @@ signatures = sig_load('COSMIC_v3.4_SBS_GRCh38')
 
 
 # Randomly simulate 5 samples, each with 400 mutations, by multinomial random sampling of SBS1
-sig_simulate_catalogues_from_signature(signatures[["SBS1"]], n = 400, n_catalogues = 5)
+catalogues <- sig_simulate_catalogues_from_signature(
+  signatures[["SBS1"]], 
+  n = 400, 
+  n_catalogues = 5
+)
 
 # Randomly simulate 5 samples, each with 400 mutations, by multinomial random sampling of a signature derived by addition of 30% SBS1 and 70 %SBS3
-sig_simulate_catalogues_from_signatures(signatures, model = c('SBS1' = 0.3, 'SBS3' = 0.7), n = 400, n_catalogues = 5)
+catalogues_from_model <- sig_simulate_catalogues_from_signatures(
+  signatures, 
+  model = c('SBS1' = 0.3, 'SBS3' = 0.7), 
+  n = 400, 
+  n_catalogues = 5
+)
 ```
 
 For noiseless, perfect reconstruction of catalogues from a signature or signature model, See [this sigstats example](https://github.com/selkamand/sigstats?tab=readme-ov-file#reconstruct-a-mutation-catalogue-from-a-signature-model)
