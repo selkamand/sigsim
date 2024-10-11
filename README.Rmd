@@ -56,25 +56,24 @@ devtools::install_github("selkamand/sigsim")
 ## Quick Start
 
 
-```{r, eval = FALSE}
+```{r}
 library(sigsim) # Signature simulation
 library(sigstash) # Signature collections
 library(sigvis) # Visualisation of signatures
-
+library(sigstats) # Signature Statistics
 
 # Load signature collections from sigstash
-signatures = sig_load('COSMIC_V3.3.1_SBS')
+signatures = sig_load('COSMIC_v3.4_SBS_GRCh38')
 
 
-# Randomly simulate a 400 mutations, by random sampling SBS1
-sig_simulate_catalogue(signatures, model = c('SBS1' = 1), n = 400)
+# Randomly simulate 5 samples, each with 400 mutations, by multinomial random sampling of SBS1
+sig_simulate_catalogues_from_signature(signatures[["SBS1"]], n = 400, n_catalogues = 5)
 
-# Randomly simulate a 400 mutations, where ~30% come from SBS1 and ~70% come from SBS3
-sig_simulate_catalogue(signatures, model = c('SBS1' = 0.3, 'SBS3' = 0.7), n = 400)
-
-# 'Simulate' a catalogue with 400 mutations, which represents a perfect addition of 30% SBS1 and 70% SBS3
-sig_simulate_catalogue(signatures, model = c('SBS1' = 0.3, 'SBS3' = 0.7), n = 400, noise = FALSE)
+# Randomly simulate 5 samples, each with 400 mutations, by multinomial random sampling of a signature derived by addition of 30% SBS1 and 70 %SBS3
+sig_simulate_catalogues_from_signatures(signatures, model = c('SBS1' = 0.3, 'SBS3' = 0.7), n = 400, n_catalogues = 5)
 ```
+
+For noiseless, perfect reconstruction of catalogues from a signature or signature model, See [this sigstats example](https://github.com/selkamand/sigstats?tab=readme-ov-file#reconstruct-a-mutation-catalogue-from-a-signature-model)
 
 
 ### Simulating Datasets for Sensitivity, Inter-Signature Interference, and Overfitting Assessment

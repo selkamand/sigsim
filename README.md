@@ -68,21 +68,180 @@ devtools::install_github("selkamand/sigsim")
 library(sigsim) # Signature simulation
 library(sigstash) # Signature collections
 library(sigvis) # Visualisation of signatures
-
+library(sigstats) # Signature Statistics
 
 # Load signature collections from sigstash
-signatures = sig_load('COSMIC_V3.3.1_SBS')
+signatures = sig_load('COSMIC_v3.4_SBS_GRCh38')
 
 
-# Randomly simulate a 400 mutations, by random sampling SBS1
-sig_simulate_catalogue(signatures, model = c('SBS1' = 1), n = 400)
+# Randomly simulate 5 samples, each with 400 mutations, by multinomial random sampling of SBS1
+sig_simulate_catalogues_from_signature(signatures[["SBS1"]], n = 400, n_catalogues = 5)
+#> $catalogue_1
+#> # A tibble: 96 × 4
+#>    channel type  count fraction
+#>    <chr>   <chr> <int>    <dbl>
+#>  1 A[C>A]A C>A       0   0     
+#>  2 A[C>A]C C>A       0   0     
+#>  3 A[C>A]G C>A       0   0     
+#>  4 A[C>A]T C>A       0   0     
+#>  5 A[C>G]A C>G       0   0     
+#>  6 A[C>G]C C>G       0   0     
+#>  7 A[C>G]G C>G       0   0     
+#>  8 A[C>G]T C>G       1   0.0025
+#>  9 A[C>T]A C>T       8   0.02  
+#> 10 A[C>T]C C>T       4   0.01  
+#> # ℹ 86 more rows
+#> 
+#> $catalogue_2
+#> # A tibble: 96 × 4
+#>    channel type  count fraction
+#>    <chr>   <chr> <int>    <dbl>
+#>  1 A[C>A]A C>A       1   0.0025
+#>  2 A[C>A]C C>A       1   0.0025
+#>  3 A[C>A]G C>A       0   0     
+#>  4 A[C>A]T C>A       0   0     
+#>  5 A[C>G]A C>G       2   0.005 
+#>  6 A[C>G]C C>G       1   0.0025
+#>  7 A[C>G]G C>G       0   0     
+#>  8 A[C>G]T C>G       3   0.0075
+#>  9 A[C>T]A C>T      11   0.0275
+#> 10 A[C>T]C C>T       5   0.0125
+#> # ℹ 86 more rows
+#> 
+#> $catalogue_3
+#> # A tibble: 96 × 4
+#>    channel type  count fraction
+#>    <chr>   <chr> <int>    <dbl>
+#>  1 A[C>A]A C>A       0   0     
+#>  2 A[C>A]C C>A       0   0     
+#>  3 A[C>A]G C>A       1   0.0025
+#>  4 A[C>A]T C>A       1   0.0025
+#>  5 A[C>G]A C>G       0   0     
+#>  6 A[C>G]C C>G       1   0.0025
+#>  7 A[C>G]G C>G       0   0     
+#>  8 A[C>G]T C>G       1   0.0025
+#>  9 A[C>T]A C>T      10   0.025 
+#> 10 A[C>T]C C>T       0   0     
+#> # ℹ 86 more rows
+#> 
+#> $catalogue_4
+#> # A tibble: 96 × 4
+#>    channel type  count fraction
+#>    <chr>   <chr> <int>    <dbl>
+#>  1 A[C>A]A C>A       1   0.0025
+#>  2 A[C>A]C C>A       2   0.005 
+#>  3 A[C>A]G C>A       0   0     
+#>  4 A[C>A]T C>A       2   0.005 
+#>  5 A[C>G]A C>G       0   0     
+#>  6 A[C>G]C C>G       3   0.0075
+#>  7 A[C>G]G C>G       0   0     
+#>  8 A[C>G]T C>G       0   0     
+#>  9 A[C>T]A C>T      12   0.03  
+#> 10 A[C>T]C C>T       0   0     
+#> # ℹ 86 more rows
+#> 
+#> $catalogue_5
+#> # A tibble: 96 × 4
+#>    channel type  count fraction
+#>    <chr>   <chr> <int>    <dbl>
+#>  1 A[C>A]A C>A       0   0     
+#>  2 A[C>A]C C>A       0   0     
+#>  3 A[C>A]G C>A       0   0     
+#>  4 A[C>A]T C>A       0   0     
+#>  5 A[C>G]A C>G       1   0.0025
+#>  6 A[C>G]C C>G       0   0     
+#>  7 A[C>G]G C>G       0   0     
+#>  8 A[C>G]T C>G       0   0     
+#>  9 A[C>T]A C>T      12   0.03  
+#> 10 A[C>T]C C>T       1   0.0025
+#> # ℹ 86 more rows
 
-# Randomly simulate a 400 mutations, where ~30% come from SBS1 and ~70% come from SBS3
-sig_simulate_catalogue(signatures, model = c('SBS1' = 0.3, 'SBS3' = 0.7), n = 400)
-
-# 'Simulate' a catalogue with 400 mutations, which represents a perfect addition of 30% SBS1 and 70% SBS3
-sig_simulate_catalogue(signatures, model = c('SBS1' = 0.3, 'SBS3' = 0.7), n = 400, noise = FALSE)
+# Randomly simulate 5 samples, each with 400 mutations, by multinomial random sampling of a signature derived by addition of 30% SBS1 and 70 %SBS3
+sig_simulate_catalogues_from_signatures(signatures, model = c('SBS1' = 0.3, 'SBS3' = 0.7), n = 400, n_catalogues = 5)
+#> $catalogue_1
+#> # A tibble: 96 × 4
+#>    channel type  count fraction
+#>    <chr>   <chr> <int>    <dbl>
+#>  1 A[C>A]A C>A       3   0.0075
+#>  2 A[C>A]C C>A       6   0.015 
+#>  3 A[C>A]G C>A       0   0     
+#>  4 A[C>A]T C>A       5   0.0125
+#>  5 A[C>G]A C>G       8   0.02  
+#>  6 A[C>G]C C>G       3   0.0075
+#>  7 A[C>G]G C>G       0   0     
+#>  8 A[C>G]T C>G       6   0.015 
+#>  9 A[C>T]A C>T       9   0.0225
+#> 10 A[C>T]C C>T       4   0.01  
+#> # ℹ 86 more rows
+#> 
+#> $catalogue_2
+#> # A tibble: 96 × 4
+#>    channel type  count fraction
+#>    <chr>   <chr> <int>    <dbl>
+#>  1 A[C>A]A C>A       8   0.02  
+#>  2 A[C>A]C C>A       3   0.0075
+#>  3 A[C>A]G C>A       2   0.005 
+#>  4 A[C>A]T C>A       7   0.0175
+#>  5 A[C>G]A C>G      11   0.0275
+#>  6 A[C>G]C C>G       4   0.01  
+#>  7 A[C>G]G C>G       0   0     
+#>  8 A[C>G]T C>G       4   0.01  
+#>  9 A[C>T]A C>T      11   0.0275
+#> 10 A[C>T]C C>T       3   0.0075
+#> # ℹ 86 more rows
+#> 
+#> $catalogue_3
+#> # A tibble: 96 × 4
+#>    channel type  count fraction
+#>    <chr>   <chr> <int>    <dbl>
+#>  1 A[C>A]A C>A       4   0.01  
+#>  2 A[C>A]C C>A       5   0.0125
+#>  3 A[C>A]G C>A       0   0     
+#>  4 A[C>A]T C>A       0   0     
+#>  5 A[C>G]A C>G       6   0.015 
+#>  6 A[C>G]C C>G       6   0.015 
+#>  7 A[C>G]G C>G       0   0     
+#>  8 A[C>G]T C>G       3   0.0075
+#>  9 A[C>T]A C>T       4   0.01  
+#> 10 A[C>T]C C>T       5   0.0125
+#> # ℹ 86 more rows
+#> 
+#> $catalogue_4
+#> # A tibble: 96 × 4
+#>    channel type  count fraction
+#>    <chr>   <chr> <int>    <dbl>
+#>  1 A[C>A]A C>A      10   0.025 
+#>  2 A[C>A]C C>A       3   0.0075
+#>  3 A[C>A]G C>A       0   0     
+#>  4 A[C>A]T C>A       5   0.0125
+#>  5 A[C>G]A C>G       4   0.01  
+#>  6 A[C>G]C C>G       2   0.005 
+#>  7 A[C>G]G C>G       0   0     
+#>  8 A[C>G]T C>G       3   0.0075
+#>  9 A[C>T]A C>T       6   0.015 
+#> 10 A[C>T]C C>T       5   0.0125
+#> # ℹ 86 more rows
+#> 
+#> $catalogue_5
+#> # A tibble: 96 × 4
+#>    channel type  count fraction
+#>    <chr>   <chr> <int>    <dbl>
+#>  1 A[C>A]A C>A       5   0.0125
+#>  2 A[C>A]C C>A       2   0.005 
+#>  3 A[C>A]G C>A       0   0     
+#>  4 A[C>A]T C>A       3   0.0075
+#>  5 A[C>G]A C>G      10   0.025 
+#>  6 A[C>G]C C>G       6   0.015 
+#>  7 A[C>G]G C>G       0   0     
+#>  8 A[C>G]T C>G       4   0.01  
+#>  9 A[C>T]A C>T       6   0.015 
+#> 10 A[C>T]C C>T       4   0.01  
+#> # ℹ 86 more rows
 ```
+
+For noiseless, perfect reconstruction of catalogues from a signature or
+signature model, See [this sigstats
+example](https://github.com/selkamand/sigstats?tab=readme-ov-file#reconstruct-a-mutation-catalogue-from-a-signature-model)
 
 ### Simulating Datasets for Sensitivity, Inter-Signature Interference, and Overfitting Assessment
 
