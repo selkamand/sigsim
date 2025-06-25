@@ -29,35 +29,33 @@ compositions.
 To generate simulated datasets, we first parameterise a multinomial
 distribution based on a single mutational signature OR some combination
 of multiple mutational signatures. We then randomly sample this
-multimonial distribution ‘n’ times (where n = number of mutations we
+multinomial distribution ‘n’ times (where n = number of mutations we
 want to simulate for a sample). It is the randomness of the sampling
 which adds noise to profiles.
 
 When simulating a catalogue generated from multiple mutational
-signatures, sigsim offers two different approaches, mixture distribution
-(generally recommended) and stratified sampling.
+signatures, sigsim offers three different approaches, mixture
+distribution (generally recommended), stratified sampling, and noiseless
+reconstruction.
 
 For example, to simulate catalogue of 400 mutations where 30% are from
 signature 1 and 70% are from signature 2:
 
 **Mixture distribution sampling (**`sig_simulate_mixed`**):**
 
-- Creates a new signature representing a 30%-70% mix of signature 1 and
-  signature 2. Samples 400 mutations from this new ‘mixed’ signature.
+- First creates a *combined* signature using a weighted average (30%
+  Signature 1, 70% Signature 2).
 
-- On average, 30% of the 400 mutations will be drawn from signature 1,
-  and 30% from signature 2. However there will be some random
-  sampling-induced variation around these contributions.
+- Then simulates mutations by drawing 400 samples from a **multinomial
+  distribution** defined by this combined signature.
 
-- Under this approach, we do NOT know exactly how many mutations are
-  from each signature. There is some randomness around the %
-  contributions because we have not stratified the sampling.
+- This adds realistic randomness - you don’t get exactly 30%/70% in
+  every simulation, just on average.
 
 **Stratified Sampling (**`sig_simulate_stratified`**):**
 
-- Independently sample 120 mutations ($30\% \times 400$) from signature
-  1 and 280 ($70\% \times 400$) from signature 2, then combine them
-  together.
+- Independently sample 120 mutations (30% x 400) from signature 1 and
+  280 (70% x 400) from signature 2, then combine them together.
 
 - Gives us exact knowledge over the balance of signatures in the final
   sample (explicitly enforced to be 120 & 280).
@@ -69,8 +67,12 @@ signature 1 and 70% are from signature 2:
   catalogues from a mixed signature, both signatures will end up
   represented.
 
+**Perfect (noiseless) catalogues (**`sig_simulate_perfect`**):**
+
 For some experiments, you may want to create perfect (‘noiseless’)
-combinations of two signatures, which sigsim also enables.
+combinations of two signatures.
+
+## Installation
 
 You can install the development version of sigsim from
 [GitHub](https://github.com/) with:
@@ -118,14 +120,14 @@ catalogues_from_model <- sig_simulate_mixed(
   seed = 42
 )
 
-# Create noiseless signatures (only ever returns 1 catalogue)
+# Create a noiseless catalogue (i.e., exact contribution: 30% SBS2, 70% SBS13, total 400 mutations)
 perfect_catalogue <- sig_simulate_perfect(
-  signatures, 
-  model = c('SBS2' = 0.3, 'SBS13' = 0.7), 
+  signatures,
+  model = c('SBS2' = 0.3, 'SBS13' = 0.7),
   n = 400
 )
 
-# Visualise one noise from one sampled profile against a noiseless (perfect) profile
+# Compare a randomly simulated catalogue to its corresponding theoretical (perfect) model
 sig_visualise_compare(catalogue1 = perfect_catalogue, catalogue2 = catalogues_from_model[[1]], "count", names = c("Simulated", "Perfect"), title = "Simulated (coloured) vs theoretically perfect (black outline)", subtitle = "400 mutations: 30% SBS2 and 70% SBS13")
 #> ✔ All channels matched perfectly to set [sbs_96]. Using this set for sort order
 #> ✔ All types matched perfectly to set [sbs_type]. Using this set for sort order
@@ -143,13 +145,12 @@ the level and type of ‘noise’ added to the model.
 
 #### Simulating Overfitting with Dropped Signatures
 
-Instead of artificially creating a low-similarity signature, another
-effective strategy is to simulate mutation catalogues using a
-combination of known signatures, but then **drop one signature** when
-performing the fitting. If the fitting algorithm attempts to explain the
-missing signature by over-relying on other available signatures, it
-indicates overfitting.
+One strategy to test for overfitting is to simulate mutation catalogues
+using a combination of known signatures, but then **drop one signature**
+when performing the fitting. If the fitting algorithm attempts to
+explain the missing signature by over-relying on other available
+signatures, it indicates overfitting.
 
 This method allows you to test how well the algorithm can handle
-‘unknown’ components-i.e., real mutational processes that aren’t
+‘unknown’ components - i.e., real mutational processes that aren’t
 represented in your signature collection.

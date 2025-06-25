@@ -33,7 +33,7 @@ Simulating mutational catalogues is crucial for evaluating the performance of si
 
 To generate simulated datasets, we first parameterise a multinomial distribution based on a single mutational signature OR some combination of multiple mutational signatures. We then randomly sample this multinomial distribution 'n' times (where n = number of mutations we want to simulate for a sample). It is the randomness of the sampling which adds noise to profiles.
 
-When simulating a catalogue generated from multiple mutational signatures, sigsim offers two different approaches, mixture distribution (generally recommended) and stratified sampling.
+When simulating a catalogue generated from multiple mutational signatures, sigsim offers three different approaches, mixture distribution (generally recommended), stratified sampling, and noiseless reconstruction.
 
 For example, to simulate catalogue of 400 mutations where 30% are from signature 1 and 70% are from signature 2:
 
@@ -47,14 +47,17 @@ For example, to simulate catalogue of 400 mutations where 30% are from signature
 
 **Stratified Sampling (**`sig_simulate_stratified`**):**
 
--   Independently sample 120 mutations ($30\% \times 400$) from signature 1 and 280 ($70\% \times 400$) from signature 2, then combine them together.
+-   Independently sample 120 mutations (30% x 400) from signature 1 and 280 (70% x 400) from signature 2, then combine them together.
 
 -   Gives us exact knowledge over the balance of signatures in the final sample (explicitly enforced to be 120 & 280).
 
 -   However, imagine we simulate a catalogue with total of 10 mutations, 96% from signature 1 and 4% from signature 2, the result would **never** include any mutations from signature 2! The mixture distribution sampling avoids this this problem. If you simulate enough catalogues from a mixed signature, both signatures will end up represented.
 
+**Perfect (noiseless) catalogues (**`sig_simulate_perfect`**):**
 
-For some experiments, you may want to create perfect ('noiseless') combinations of two signatures, which sigsim also enables.
+For some experiments, you may want to create perfect ('noiseless') combinations of two signatures.
+
+## Installation
 
 You can install the development version of sigsim from [GitHub](https://github.com/) with:
 
@@ -118,6 +121,6 @@ The datasets simulated above are well-suited for evaluating **sensitivity** and 
 
 #### Simulating Overfitting with Dropped Signatures
 
-Instead of artificially creating a low-similarity signature, another effective strategy is to simulate mutation catalogues using a combination of known signatures, but then **drop one signature** when performing the fitting. If the fitting algorithm attempts to explain the missing signature by over-relying on other available signatures, it indicates overfitting.
+One strategy to test for overfitting is to simulate mutation catalogues using a combination of known signatures, but then **drop one signature** when performing the fitting. If the fitting algorithm attempts to explain the missing signature by over-relying on other available signatures, it indicates overfitting.
 
-This method allows you to test how well the algorithm can handle 'unknown' components-i.e., real mutational processes that aren't represented in your signature collection.
+This method allows you to test how well the algorithm can handle 'unknown' components - i.e., real mutational processes that aren't represented in your signature collection.
