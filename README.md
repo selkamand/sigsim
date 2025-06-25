@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# sigsim <img src="man/figures/sigsim_hex_96dpi.png" align="right" height="120" />
+# sigsim <img src="man/figures/sigsim_hex_96dpi.png" align="right" height="120"/>
 
 <!-- badges: start -->
 
@@ -9,6 +9,7 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/sigsim)](https://CRAN.R-project.org/package=sigsim)
+
 <!-- badges: end -->
 
 **sigsim** simplifies simulation of mutational signature catalogues.
@@ -20,39 +21,56 @@ sigsim is in early development and not yet ready for use.
 
 ## Philosophy
 
-Simulating datasets from mutational signature collections is essential
-for benchmarking the performance of mutational signature analysis tools,
-particularly identifying failure modes.
+Simulating mutational catalogues is crucial for evaluating the
+performance of signature analysis tools. To assess how reliably
+signatures can be detected, we use simulated catalogues with known
+compositions.
 
-For example, In cancer contexts we’re often interested in a single base
-substitution known as ‘Signature 3’. This is because the signature seems
-to correlate with an underlying biological phenomena that relates a
-patient’s likelihood of responding to certain therapies.
-
-For important signatures like this, its important to understand how well
-we can actually identify the signature, and what other signatures may
-cause false positives / false negatives. These questions can be
-addressed using simulation experiments.
-
-**sigsim** simplifies creation of simulated datasets, where by ‘dataset’
-we mean per-sample catalogues describing a tally of ‘mutations’ matching
-each ‘channel’ in a signature.
-
-To generate these datasets we first paramaterise a multinomial
+To generate simulated datasets, we first parameterise a multinomial
 distribution based on a single mutational signature OR some combination
 of multiple mutational signatures. We then randomly sample this
-multimonium distribution ‘n’ times (where n = number of mutations we
-want to simulate for a sample).
+multimonial distribution ‘n’ times (where n = number of mutations we
+want to simulate for a sample). It is the randomness of the sampling
+which adds noise to profiles.
 
-When you simulate catalogues by random sampling a multinomial model in
-this way, the randomness of the sampling adds noise. For some
-experiments, you may want to include catalogues that represent perfect
-(‘noiseless’) combinations of two signatures.
+When simulating a catalogue generated from multiple mutational
+signatures, sigsim offers two different approaches, mixture distribution
+(generally recommended) and stratified sampling.
 
-You can create these ‘perfect’ datasets using the `noise = FALSE`
-argument of `sig_simulate_catalogue()`
+For example, to simulate catalogue of 400 mutations where 30% are from
+signature 1 and 70% are from signature 2:
 
-## Installation
+**Mixture distribution sampling (**`sig_simulate_mixed`**):**
+
+- Creates a new signature representing a 30%-70% mix of signature 1 and
+  signature 2. Samples 400 mutations from this new ‘mixed’ signature.
+
+- On average, 30% of the 400 mutations will be drawn from signature 1,
+  and 30% from signature 2. However there will be some random
+  sampling-induced variation around these contributions.
+
+- Under this approach, we do NOT know exactly how many mutations are
+  from each signature. There is some randomness around the %
+  contributions because we have not stratified the sampling.
+
+**Stratified Sampling (**`sig_simulate_stratified`**):**
+
+- Independently sample 120 mutations ($30\% \times 400$) from signature
+  1 and 280 ($70\% \times 400$) from signature 2, then combine them
+  together.
+
+- Gives us exact knowledge over the balance of signatures in the final
+  sample (explicitly enforced to be 120 & 280).
+
+- However, imagine we simulate a catalogue with total of 10 mutations,
+  96% from signature 1 and 4% from signature 2, the result would
+  **never** include any mutations from signature 2! The mixture
+  distribution sampling avoids this this problem. If you simulate enough
+  catalogues from a mixed signature, both signatures will end up
+  represented.
+
+For some experiments, you may want to create perfect (‘noiseless’)
+combinations of two signatures, which sigsim also enables.
 
 You can install the development version of sigsim from
 [GitHub](https://github.com/) with:
@@ -63,6 +81,16 @@ devtools::install_github("selkamand/sigsim")
 ```
 
 ## Quick Start
+
+### Which Function Should I Use?
+
+| Goal | Use This Function |
+|----|----|
+| Simulate from 1 signature | `sig_simulate_single()` |
+| Simulate from multiple (stochastic) | `sig_simulate_mixed()` |
+| Simulate from multiple (fixed proportions) | `sig_simulate_stratified()` |
+| Create noiseless catalogue (based on model) | `sig_simulate_perfect()` |
+| Create noiseless catalogue (based on single signature) | `sigstats::sig_reconstruct()` |
 
 ``` r
 library(sigsim) # Signature simulation
@@ -75,24 +103,36 @@ signatures = sig_load('COSMIC_v3.4_SBS_GRCh38')
 
 
 # Randomly simulate 5 samples, each with 400 mutations, by multinomial random sampling of SBS1
-catalogues <- sig_simulate_catalogues_from_signature(
+catalogues <- sig_simulate_single(
   signatures[["SBS1"]], 
   n = 400, 
   n_catalogues = 5
 )
 
-# Randomly simulate 5 samples, each with 400 mutations, by multinomial random sampling of a signature derived by addition of 30% SBS1 and 70 %SBS3
-catalogues_from_model <- sig_simulate_catalogues_from_signatures(
+# Randomly simulate 5 samples, each with 400 mutations, by multinomial random sampling of an underlying reconstructed signature containing 30% SBS1 and 70% SBS3
+catalogues_from_model <- sig_simulate_mixed(
   signatures, 
-  model = c('SBS1' = 0.3, 'SBS3' = 0.7), 
+  model = c('SBS2' = 0.3, 'SBS13' = 0.7), 
   n = 400, 
-  n_catalogues = 5
+  n_catalogues = 5, 
+  seed = 42
 )
+
+# Create noiseless signatures (only ever returns 1 catalogue)
+perfect_catalogue <- sig_simulate_perfect(
+  signatures, 
+  model = c('SBS2' = 0.3, 'SBS13' = 0.7), 
+  n = 400
+)
+
+# Visualise one noise from one sampled profile against a noiseless (perfect) profile
+sig_visualise_compare(catalogue1 = perfect_catalogue, catalogue2 = catalogues_from_model[[1]], "count", names = c("Simulated", "Perfect"), title = "Simulated (coloured) vs theoretically perfect (black outline)", subtitle = "400 mutations: 30% SBS2 and 70% SBS13")
+#> ✔ All channels matched perfectly to set [sbs_96]. Using this set for sort order
+#> ✔ All types matched perfectly to set [sbs_type]. Using this set for sort order
+#> ✔ Types matched perfectly to palette [snv_type]
 ```
 
-For noiseless, perfect reconstruction of catalogues from a signature or
-signature model, See [this sigstats
-example](https://github.com/selkamand/sigstats?tab=readme-ov-file#reconstruct-a-mutation-catalogue-from-a-signature-model)
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
 
 ### Simulating Datasets for Sensitivity, Inter-Signature Interference, and Overfitting Assessment
 
@@ -100,38 +140,6 @@ The datasets simulated above are well-suited for evaluating
 **sensitivity** and **inter-signature interference**. However, if your
 focus is on **assessing overfitting**, you may need more control over
 the level and type of ‘noise’ added to the model.
-
-In the previous examples, noise is introduced via random sampling from
-the multinomial distribution. But for overfitting assessment, we might
-want this noise to diverge more significantly from the signatures we’re
-modeling.
-
-#### Adding Controlled Noise to Simulations
-
-One approach is to simulate **n1** mutations that follow a ‘perfect’
-signature and then add **n2** mutations from a clearly defined ‘noise’
-model. This raises the question: **what should our noise model be?**
-
-Here are two options:
-
-1.  **Uniform Distribution**  
-    A simple choice is to generate noise by randomly distributing the
-    **n2** mutations across all available channels. This represents a
-    completely uniform noise model, where mutations are allocated
-    without reference to any specific signature.
-
-2.  **Low-Cosine-Similarity Signature**  
-    A more sophisticated approach is to simulate noise using an
-    artificially created signature with a low cosine similarity to
-    **all** known signatures in a given collection. This simulates the
-    addition of noise from a mutational process not represented in the
-    current dataset.  
-    This approach is particularly useful when applying mutational
-    signatures in novel contexts—such as using signature databases
-    developed for adult cancers in childhood cancer research.
-    Differences in mutational processes between disease types may lead
-    to signatures that don’t fully capture the true spectrum of
-    mutational signatures, increasing the risk of overfitting.
 
 #### Simulating Overfitting with Dropped Signatures
 
@@ -143,5 +151,5 @@ missing signature by over-relying on other available signatures, it
 indicates overfitting.
 
 This method allows you to test how well the algorithm can handle
-‘unknown’ components—i.e., real mutational processes that aren’t
+‘unknown’ components-i.e., real mutational processes that aren’t
 represented in your signature collection.

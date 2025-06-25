@@ -4,12 +4,12 @@
 \name{sigsim-package}
 \alias{sigsim}
 \alias{sigsim-package}
-\title{sigsim: What the Package Does (One Line, Title Case)}
+\title{sigsim: Simulate Mutational Signature Catalogues for Benchmarking and Testing}
 \description{
-What the package does (one paragraph).
+Tools for simulating mutation catalogues based on one or more mutational signatures, with or without added noise. Supports both stochastic sampling (via multinomial models) and exact stratified sampling to mimic real-world or controlled experimental conditions. Designed to aid benchmarking of signature detection, sensitivity analysis, and overfitting assessment in mutational signature analysis workflows.
 }
 \author{
-\strong{Maintainer}: First Last \email{first.last@example.com} (\href{https://orcid.org/YOUR-ORCID-ID}{ORCID})
+\strong{Maintainer}: Sam El-Kamand \email{selkamand@ccia.org.au} (\href{https://orcid.org/0000-0003-2270-8088}{ORCID})
 
 }
 \keyword{internal}
