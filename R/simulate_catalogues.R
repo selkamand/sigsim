@@ -309,3 +309,69 @@ sig_simulate_perfect <- function(signatures, model, n, format = c("sigverse", "m
 
   return(catalogue)
 }
+
+
+
+#' Bootstrap a Mutation Catalogue
+#'
+#' Generates bootstrap resamples of a mutational catalogue by multinomial resampling
+#' of its observed mutation counts. This allows creation of synthetic catalogues that
+#' reflect sampling variability in mutation observations.
+#'
+#' The probability distribution for resampling is based on the `fraction` or `count` column
+#' of the input catalogue. A total of `n_catalogues` bootstrapped catalogues are created,
+#' each with the same total number of mutations as the original catalogue.
+#'
+#' @param catalogue A single sigverse-style catalogue to bootstrap. See [sigshared::example_catalogue()].
+#' @param n_catalogues The number of bootstrap replicates to generate. Default is 10.
+#' @param format The output format. Either:
+#'   - `"sigverse"`: return a list of sigverse-style data.frames (default).
+#'   - `"matrix"`: return a matrix with rows as channels and columns as simulated catalogues.
+#' @param prefix String prefix to name each catalogue. Default is `"catalogue"`.
+#' @param seed Optional seed for reproducibility.
+#'
+#' @return Either a list of sigverse-style catalogues or a matrix of bootstrapped counts.
+#'
+#' @examples
+#' library(sigshared)
+#'
+#' # Bootstrap catalogue (return catalogue collection as list)
+#' bootstraps <- sig_bootstrap_catalogue(example_catalogue(), n_catalogues = 5)
+#'
+#' # Return  matrix
+#' mx <- sig_bootstrap_catalogue(example_catalogue(), n_catalogues = 5, format = "matrix")
+#'
+#' @export
+sig_bootstrap_catalogue <- function(
+    catalogue,
+    n_catalogues = 10,
+    format = c("sigverse", "matrix"),
+    prefix = "catalogue",
+    seed = NULL
+) {
+  # Assertions
+  sigshared::assert_catalogue(catalogue)
+  format <- rlang::arg_match(format)
+
+  # Derive parameters
+  total_mutations <- sum(catalogue[["count"]])
+  probs_per_channel <- sigshared::compute_fraction(catalogue[["count"]])
+
+  # Bootstrap with multinomial sampling
+  bootstraps <- sigshared::with_seed(
+    seed = seed,
+    rmultinom(n = n_catalogues, size = total_mutations, prob = probs_per_channel)
+  )
+
+  # Add row/column names and type attributes
+  rownames(bootstraps) <- catalogue[["channel"]]
+  colnames(bootstraps) <- paste0(prefix, "_", seq_len(n_catalogues))
+  attr(bootstraps, "type") <- catalogue[["type"]]
+
+  # Return as matrix
+  if (format == "matrix") return(bootstraps)
+
+  # Convert to sigverse-style catalogue list
+  sigshared::sig_collection_reformat_matrix_to_list(bootstraps)
+}
+

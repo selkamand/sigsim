@@ -182,3 +182,45 @@ test_that("sig_simulate_single handles edge cases", {
   # Negative n → should throw error
   expect_error(sig_simulate_single(example_sig, n = -5, n_catalogues = 1), "n must be greater than or equal to `0`")
 })
+
+
+# Test Bootstraps ---------------------------------------------------------
+
+test_that("sig_bootstrap_catalogue returns correct number of catalogues", {
+  catalogue <- sigshared::example_catalogue()
+  boot <- sig_bootstrap_catalogue(catalogue, n_catalogues = 5)
+  expect_type(boot, "list")
+  expect_length(boot, 5)
+})
+
+test_that("sig_bootstrap_catalogue preserves total mutation count", {
+  catalogue <- sigshared::example_catalogue()
+  total <- sum(catalogue$count)
+  boot <- sig_bootstrap_catalogue(catalogue, n_catalogues = 3)
+  for (b in boot) {
+    expect_equal(sum(b$count), total)
+  }
+})
+
+test_that("sig_bootstrap_catalogue returns correct format = matrix", {
+  catalogue <- sigshared::example_catalogue()
+  mat <- sig_bootstrap_catalogue(catalogue, n_catalogues = 4, format = "matrix")
+  expect_true(is.matrix(mat))
+  expect_equal(ncol(mat), 4)
+  expect_equal(nrow(mat), nrow(catalogue))
+  expect_equal(sum(mat[, 1]), sum(catalogue$count))
+})
+
+test_that("sig_bootstrap_catalogue sets reproducible seed", {
+  catalogue <- sigshared::example_catalogue()
+  boot1 <- sig_bootstrap_catalogue(catalogue, n_catalogues = 3, seed = 42)
+  boot2 <- sig_bootstrap_catalogue(catalogue, n_catalogues = 3, seed = 42)
+  expect_equal(boot1, boot2)
+})
+
+test_that("sig_bootstrap_catalogue names output correctly", {
+  catalogue <- sigshared::example_catalogue()
+  boot <- sig_bootstrap_catalogue(catalogue, n_catalogues = 2, prefix = "test")
+  expect_named(boot, c("test_1", "test_2"))
+})
+

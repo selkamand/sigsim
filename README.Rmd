@@ -79,13 +79,14 @@ devtools::install_github("selkamand/sigsim")
 
 ### Which Function Should I Use?
 
-| Goal | Use This Function |
-|--------------------|----------------------------------------------------|
-| Simulate from 1 signature | `sig_simulate_single()` |
-| Simulate from multiple (stochastic) | `sig_simulate_mixed()` |
-| Simulate from multiple (fixed proportions) | `sig_simulate_stratified()` |
-| Create noiseless catalogue (based on model) | `sig_simulate_perfect()` |
-| Create noiseless catalogue (based on single signature) | `sigstats::sig_reconstruct()` |
+| Goal                                             | Use This Function             |
+|--------------------------------------------------|-------------------------------|
+| Simulate from 1 signature                        | `sig_simulate_single()`       |
+| Simulate from multiple (stochastic)              | `sig_simulate_mixed()`        |
+| Simulate from multiple (fixed proportions)       | `sig_simulate_stratified()`   |
+| Create noiseless catalogue (based on model)      | `sig_simulate_perfect()`      |
+| Create noiseless catalogue (from one signature)  | `sigstats::sig_reconstruct()` |
+| Bootstrap/resample observed catalogue            | `sig_bootstrap_catalogue()`   |
 
 ```{r fig.width=10, fig.height=4}
 library(sigsim) # Signature simulation
@@ -123,6 +124,28 @@ perfect_catalogue <- sig_simulate_perfect(
 # Compare a randomly simulated catalogue to its corresponding theoretical (perfect) model
 sig_visualise_compare(catalogue1 = perfect_catalogue, catalogue2 = catalogues_from_model[[1]], "count", names = c("Simulated", "Perfect"), title = "Simulated (coloured) vs theoretically perfect (black outline)", subtitle = "400 mutations: 30% SBS2 and 70% SBS13")
 ```
+
+### Bootstrapping Existing Catalogues
+
+Sometimes instead of simulating from known signatures, you want to resample from an observed catalogue to explore uncertainty or assess robustness.
+
+Use sig_bootstrap_catalogue() to generate bootstrap replicates:
+
+```{r}
+library(sigshared)
+library(sigsim)
+
+# Load an example observed catalogue
+catalogue <- example_catalogue()
+
+# Generate 5 bootstrap replicates
+bootstraps <- sig_bootstrap_catalogue(catalogue, n_catalogues = 5)
+
+# View one bootstrap replicate
+bootstraps[[1]]
+```
+
+
 
 ### Simulating Datasets for Sensitivity, Inter-Signature Interference, and Overfitting Assessment
 
