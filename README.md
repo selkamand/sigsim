@@ -63,14 +63,26 @@ signature 1 and 70% are from signature 2:
 - However, imagine we simulate a catalogue with total of 10 mutations,
   96% from signature 1 and 4% from signature 2, the result would
   **never** include any mutations from signature 2! The mixture
-  distribution sampling avoids this this problem. If you simulate enough
-  catalogues from a mixed signature, both signatures will end up
-  represented.
+  distribution sampling avoids this this problem.
 
 **Perfect (noiseless) catalogues (**`sig_simulate_perfect`**):**
 
-For some experiments, you may want to create perfect (‘noiseless’)
-combinations of two signatures.
+- Creates a deterministic catalogue from a signature model (e.g., 30%
+  SBS2 and 70% SBS13), without any stochastic noise.
+
+- This is useful for generating ground truth profiles or for validating
+  how well tools can detect signatures when no noise is present.
+
+- By default, counts are **rounded to whole numbers** to reflect
+  biological realism (mutations are discrete).
+
+- However, rounding can distort the expected proportions, especially
+  with low mutation counts. For example, simulating 1 mutation will
+  rarely produce a catalogue with good cosine similarity to the
+  underlying signature profile.
+
+- If exact proportions are needed (e.g., for cosine similarity of 1 with
+  the model), set `round = FALSE`.
 
 ## Installation
 
@@ -92,7 +104,8 @@ devtools::install_github("selkamand/sigsim")
 | Simulate from multiple (stochastic) | `sig_simulate_mixed()` |
 | Simulate from multiple (fixed proportions) | `sig_simulate_stratified()` |
 | Create noiseless catalogue (based on model) | `sig_simulate_perfect()` |
-| Create noiseless catalogue (based on single signature) | `sigstats::sig_reconstruct()` |
+| Create noiseless catalogue (from one signature) | `sigstats::sig_reconstruct()` |
+| Bootstrap/resample observed catalogue | `sig_bootstrap_catalogue()` |
 
 ``` r
 library(sigsim) # Signature simulation
@@ -135,6 +148,37 @@ sig_visualise_compare(catalogue1 = perfect_catalogue, catalogue2 = catalogues_fr
 ```
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+
+### Bootstrapping Existing Catalogues
+
+Sometimes instead of simulating from known signatures, you want to
+resample from an observed catalogue to explore uncertainty or assess
+robustness.
+
+Use sig_bootstrap_catalogue() to generate bootstrap replicates:
+
+``` r
+library(sigshared)
+#> 
+#> Attaching package: 'sigshared'
+#> The following object is masked from 'package:sigvis':
+#> 
+#>     example_umap
+library(sigsim)
+
+# Load an example observed catalogue
+catalogue <- example_catalogue()
+
+# Generate 5 bootstrap replicates
+bootstraps <- sig_bootstrap_catalogue(catalogue, n_catalogues = 5)
+
+# View one bootstrap replicate
+bootstraps[[1]]
+#>   channel type count  fraction
+#> 1 A[T>C]G  T>C     4 0.1481481
+#> 2 A[T>C]C  T>C     8 0.2962963
+#> 3 A[T>C]T  T>C    15 0.5555556
+```
 
 ### Simulating Datasets for Sensitivity, Inter-Signature Interference, and Overfitting Assessment
 

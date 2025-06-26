@@ -41,6 +41,8 @@ with rownames as channels and values as mutation counts.
 \item{simplify}{A logical value indicating whether to return a single catalogue
 (as a tibble) when only one catalogue is generated and \code{format = "sigverse"}.
 Defaults to FALSE.}
+
+\item{verbose}{verbose mode (flag)}
 }
 \value{
 A named list with:
@@ -54,6 +56,8 @@ Simulate catalogues by independently sampling from each signature in the model,
 ensuring exact contribution proportions.
 }
 \examples{
+library(sigstash)
+
 #' # Load Signature Collection
 signatures <- sig_load('COSMIC_v3.4_SBS_GRCh38')
 
