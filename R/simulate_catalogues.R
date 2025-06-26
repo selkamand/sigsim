@@ -69,12 +69,14 @@ sig_simulate_mixed <- function(
 #' ensuring exact contribution proportions.
 #'
 #' @inheritParams sig_simulate_mixed
-#'
+#' @param verbose verbose mode (flag)
 #' @return A named list with:
 #'  - `mutations_per_signature`: A named vector of how many mutations were sampled from each signature
 #'  - `catalogues`: A list or matrix of simulated catalogues (see `format` argument)
 #'
 #' @examples
+#' library(sigstash)
+#'
 #' #' # Load Signature Collection
 #' signatures <- sig_load('COSMIC_v3.4_SBS_GRCh38')
 #'
@@ -254,7 +256,8 @@ sig_simulate_single <- function(
 #' @param format The output format. Choose between:
 #'   - `"sigverse"`: Returns a single sigverse-style catalogue data.frame with `channel`, `type`, `count`, and `fraction`.
 #'   - `"matrix"`: Returns a matrix with `channel` names as rows and counts as values.
-#'
+#' @param round round counts to ensure they're whole numbers.
+#' This will introduce some 'imperfection' in that fraction of counts may differ from underlying signature.
 #' @return A single perfect catalogue representing the deterministic combination of signatures in `model`.
 #'   Returned in either sigverse-style format or matrix form, depending on `format` argument.
 #'
@@ -274,7 +277,7 @@ sig_simulate_single <- function(
 #' perfect_mat <- sig_simulate_perfect(signatures, model = model, n = 400, format = "matrix")
 #'
 #' @export
-sig_simulate_perfect <- function(signatures, model, n, format = c("sigverse", "matrix")){
+sig_simulate_perfect <- function(signatures, model, n, format = c("sigverse", "matrix"), round=TRUE){
 
   # Assertions
   sigshared::assert_signature_collection(signatures)
@@ -285,8 +288,16 @@ sig_simulate_perfect <- function(signatures, model, n, format = c("sigverse", "m
   # Create combined sig based on model
   sig_combined <- sigstats::sig_combine(signatures = signatures, model = model, format = "signature", verbose = FALSE)
 
-  # Create
+  # Create Counts
   sig_combined[["count"]] <- sig_combined[["fraction"]] * n
+
+  # Round counts
+  if(round){
+    sig_combined[["count"]] <- round(sig_combined[["count"]], digits=0)
+
+    # Fix fraction of catalogue (can be changed by rounding)
+    sig_combined[["fraction"]] <- sigshared::compute_fraction(sig_combined[["count"]])
+  }
 
   # Move fraction to last column
   catalogue <- sig_combined[c(setdiff(colnames(sig_combined), "fraction"), "fraction")]

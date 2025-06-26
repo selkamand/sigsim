@@ -4,7 +4,13 @@
 \alias{sig_simulate_perfect}
 \title{Simulate a Perfect (Noiseless) Catalogue from a Signature Model}
 \usage{
-sig_simulate_perfect(signatures, model, n, format = c("sigverse", "matrix"))
+sig_simulate_perfect(
+  signatures,
+  model,
+  n,
+  format = c("sigverse", "matrix"),
+  round = TRUE
+)
 }
 \arguments{
 \item{signatures}{A named list of signatures in sigverse format. See \code{\link[sigshared:signature_collection]{sigshared::example_signature_collection()}}.}
@@ -19,6 +25,9 @@ The names must match entries in \code{signatures}. See \code{\link[sigshared:mod
 \item \code{"sigverse"}: Returns a single sigverse-style catalogue data.frame with \code{channel}, \code{type}, \code{count}, and \code{fraction}.
 \item \code{"matrix"}: Returns a matrix with \code{channel} names as rows and counts as values.
 }}
+
+\item{round}{round counts to ensure they're whole numbers.
+This will introduce some 'imperfection' in that fraction of counts may differ from underlying signature.}
 }
 \value{
 A single perfect catalogue representing the deterministic combination of signatures in \code{model}.

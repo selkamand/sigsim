@@ -63,14 +63,26 @@ signature 1 and 70% are from signature 2:
 - However, imagine we simulate a catalogue with total of 10 mutations,
   96% from signature 1 and 4% from signature 2, the result would
   **never** include any mutations from signature 2! The mixture
-  distribution sampling avoids this this problem. If you simulate enough
-  catalogues from a mixed signature, both signatures will end up
-  represented.
+  distribution sampling avoids this this problem.
 
 **Perfect (noiseless) catalogues (**`sig_simulate_perfect`**):**
 
-For some experiments, you may want to create perfect (‘noiseless’)
-combinations of two signatures.
+- Creates a deterministic catalogue from a signature model (e.g., 30%
+  SBS2 and 70% SBS13), without any stochastic noise.
+
+- This is useful for generating ground truth profiles or for validating
+  how well tools can detect signatures when no noise is present.
+
+- By default, counts are **rounded to whole numbers** to reflect
+  biological realism (mutations are discrete).
+
+- However, rounding can distort the expected proportions, especially
+  with low mutation counts. For example, simulating 1 mutation will
+  rarely produce a catalogue with good cosine similarity to the
+  underlying signature profile.
+
+- If exact proportions are needed (e.g., for cosine similarity of 1 with
+  the model), set `round = FALSE`.
 
 ## Installation
 
